@@ -661,10 +661,14 @@ void get_acc(int16_t *acc_array) {
     bmi_read(&reg_intstatus, &tmp, 1);
 
     if ((tmp & 0b10000000) == 0x80) {
-        ret = bmi_read(&addr_acc_z_msb, &tmp, 1);
-        acc_z = tmp;
-        ret = bmi_read(&addr_acc_z_lsb, &tmp, 1);
-        acc_z = (acc_z << 8) | tmp;
+        ret = bmi_read(&addr_acc_x_msb, &tmp, 1);
+        acc_x = tmp;
+        ret = bmi_read(&addr_acc_x_lsb, &tmp, 1);
+        acc_x = (acc_x << 8) | tmp;
+        ret = bmi_read(&addr_acc_y_msb, &tmp, 1);
+        acc_y = tmp;
+        ret = bmi_read(&addr_acc_y_lsb, &tmp, 1);
+        acc_y = (acc_y << 8) | tmp;
         ret = bmi_read(&addr_acc_z_msb, &tmp, 1);
         acc_z = tmp;
         ret = bmi_read(&addr_acc_z_lsb, &tmp, 1);
