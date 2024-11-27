@@ -1,9 +1,12 @@
+#include <string.h>
 #include "driver/uart.h"
+#include "esp_log.h"
 
 #define BUF_SIZE (128)      // buffer size
 #define TXD_PIN 1           // UART TX pin
 #define RXD_PIN 3           // UART RX pin
 #define UART_NUM UART_NUM_0 // UART port number
+#define REDIRECT_LOGS 1 // if redirect ESP log to another UART
 
 // Function for sending things to UART1
 static int uart1_printf(const char *str, va_list ap) {
