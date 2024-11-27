@@ -651,7 +651,7 @@ void bmipowermode(void) {
     vTaskDelay(1000 / portTICK_PERIOD_MS);
 }
 
-void get_acc(uint16_t *acc_array) {
+void get_acc(int16_t *acc_array) {
     uint8_t reg_intstatus = 0x03, tmp;
     uint8_t addr_acc_x_lsb = 0x0C, addr_acc_x_msb = 0x0D;
     uint8_t addr_acc_y_lsb = 0x0E, addr_acc_y_msb = 0x0F;
@@ -670,15 +670,14 @@ void get_acc(uint16_t *acc_array) {
         ret = bmi_read(&addr_acc_z_lsb, &tmp, 1);
         acc_z = (acc_z << 8) | tmp;
 
-        printf("acc_z: %f g\n", (int16_t)acc_z * (8.000 / 32768));
         
         if (ret != ESP_OK) {
             printf("Error lectura: %s \n", esp_err_to_name(ret));
         }
 
-        acc_array[0] = acc_x;
-        acc_array[1] = acc_y;
-        acc_array[2] = acc_z;
+        acc_array[0] = (int16_t)acc_x * (8.000 / 32768);
+        acc_array[1] = (int16_t)acc_y * (8.000 / 32768);
+        acc_array[2] = (int16_t)acc_z * (8.000 / 32768);
     }
 
 }
