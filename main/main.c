@@ -13,11 +13,12 @@
 void start_reading(void) {
     char read_buffer[4];
     const char *uart_send_buffer;
+    int16_t acc_array[3];
     while (1) {
         int read_len = serial_read(read_buffer, 4);
         if (read_len > 0) {
-            if strcmp(read_buffer, "STOP") == 0 {
-                uart_write_bytes(UART_NUM, "OK\n", 3);
+            if (strcmp(read_buffer, "STOP") == 0) {
+                serial_write("OK\n", 3);
                 break;
             }
         }
@@ -29,16 +30,15 @@ void start_reading(void) {
 }
 
 void start_conn(void) {
-    char read_buffer[4];
-    const char *uart_send_buffer;
+    char read_buffer[8];
     while (1) {
-        int read_len = serial_read(read_buffer, 4);
+        int read_len = serial_read(read_buffer, 8);
         if (read_len > 0) {
-            if strcmp(read_buffer, "TEST") == 0 {
-                uart_write_bytes(UART_NUM, "OK\n", 3);
+            if (strcmp(read_buffer, "TEST") == 0) {
+                serial_write("OK\n", 3);
             }
-            else if strcmp(read_buffer, "START") == 0 {
-                uart_write_bytes(UART_NUM, "OK\n", 3);
+            else if (strcmp(read_buffer, "START") == 0) {
+                serial_write("OK\n", 3);
                 // Start reading
                 start_reading();
             }
