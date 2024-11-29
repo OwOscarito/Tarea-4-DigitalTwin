@@ -66,7 +66,7 @@ def receive_acc_data() -> tuple[float, float, float]:
         logging.debug("Error unpacking data")
         return None
     else:
-        return acc_x, acc_y, acc_z
+        return [acc_x, acc_y, acc_z]
 
 if __name__ == "__main__":
     LOGGING_FORMAT = "%(levelname)s - <%(funcName)s>: %(message)s"

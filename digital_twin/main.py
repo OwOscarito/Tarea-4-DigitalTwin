@@ -1,12 +1,14 @@
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import numpy as np
-import random as rnd
+#import random as rnd
+import receiver
 
 fig, ax = plt.subplots(subplot_kw=dict(projection="3d"))
 
 def get_arrow(theta):
-    collected_data = [rnd.uniform(-1.0, 1.0), rnd.uniform(-1.0, 1.0), rnd.uniform(-1.0, 1.0)]
+    collected_data = receiver.receive_acc_data()
+    #collected_data = [rnd.uniform(-1.0, 1.0), rnd.uniform(-1.0, 1.0), rnd.uniform(-1.0, 1.0)]
     x = 0
     y = 0
     z = 0
