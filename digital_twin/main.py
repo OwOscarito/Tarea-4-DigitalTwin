@@ -3,20 +3,26 @@ from matplotlib.animation import FuncAnimation
 import numpy as np
 import random as rnd
 
-ax = plt.axes(projection='3d')
-line, = ax.plot3D([], [], [])
+fig, ax = plt.subplots(subplot_kw=dict(projection="3d"))
 
+def get_arrow(theta):
+    collected_data = [rnd.uniform(-1.0, 1.0), rnd.uniform(-1.0, 1.0), rnd.uniform(-1.0, 1.0)]
+    x = 0
+    y = 0
+    z = 0
+    u = collected_data[0]
+    v = collected_data[1]
+    w = collected_data[2]
+    return x,y,z,u,v,w
 
-def animate(i):
-    collected_data = [2*rnd.random(),2*rnd.random(),2*rnd.random()]
-    x = np.linspace(0, collected_data[0], 100)
-    y = np.linspace(0, collected_data[1], 100)
-    z = np.linspace(0, collected_data[2], 100)
-    line.set_data_3d(x, y, z)
+quiver = ax.quiver(*get_arrow(0))
 
-ax.set_zlim3d(-1, 1)
-ax.set_ylim3d(-1, 1)
-ax.set_xlim3d(-1, 1)
-ani = FuncAnimation(plt.gcf(), animate, interval=1000)
-plt.tight_layout()
+ax.set(xlim=[-1, 1], ylim=[-1, 1], zlim=[-1, 1])
+
+def update(theta):
+    global quiver
+    quiver.remove()
+    quiver = ax.quiver(*get_arrow(theta))
+
+ani = FuncAnimation(fig, update, frames=np.linspace(0,2*np.pi,200), interval=1000)
 plt.show()
