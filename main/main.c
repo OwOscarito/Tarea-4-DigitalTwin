@@ -692,7 +692,7 @@ static void uart_setup() {
 }
 
 // Write message through UART_num
-int serial_write(char *msg, int size){
+int serial_write(const char *msg, int size){
     int ret = uart_write_bytes(UART_NUM, msg, size);
     return ret;
 }
@@ -740,8 +740,8 @@ void get_acc(float *acc_array) {
 
 #if 1
 void start_reading(void) {
-    char read_buffer[4];
-    char *uart_send_buffer;
+    char read_buffer[5];
+    const char *uart_send_buffer;
     float acc_array[3];
     while (1) {
         int read_len = serial_read(read_buffer, 4);
@@ -752,8 +752,8 @@ void start_reading(void) {
             }
         }
         get_acc(acc_array);
-        uart_send_buffer = (char *)acc_array;
-        serial_write(uart_send_buffer, 3 * sizeof(int16_t));
+        uart_send_buffer = (const char *)acc_array;
+        serial_write(uart_send_buffer, 3 * sizeof(float));
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
