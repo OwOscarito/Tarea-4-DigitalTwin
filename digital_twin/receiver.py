@@ -1,46 +1,76 @@
-import serial
+import time
 from struct import pack, unpack
 
+import serial
+
 # Se configura el puerto y el BAUD_Rate
-PORT = 'COM3'  # Esto depende del sistema operativo
+PORT = "COM3"  # Esto depende del sistema operativo
 BAUD_RATE = 115200  # Debe coincidir con la configuracion de la ESP32
 
+
 # Se abre la conexion serial
-ser = serial.Serial(PORT, BAUD_RATE, timeout = 1)
+ser = serial.Serial(PORT, BAUD_RATE, timeout=1)
+
 
 # Funciones
-def send_message(message):
-    """ Funcion para enviar un mensaje a la ESP32 """
-    ser.write(message)
+def send_message(bytes_format: str, message: bytes) -> None:
+    """Funcion para enviar un mensaje a la ESP32."""
+    ser.write(pack(bytes_format, message))
 
-def receive_response():
-    """ Funcion para recibir un mensaje de la ESP32 """
-    response = ser.readline()
-    return response
 
-def receive_data():
-    """ Funcion que recibe tres floats (fff) de la ESP32 
-    y los imprime en consola """
-    data = receive_response()
-    print(f"Data = {data}")
-    data = unpack("fff", data)
-    print(f'Received: {data}')
-    return data
+def receive_message() -> bytes:
+    """Funcion para recibir un mensaje de la ESP32."""
+    return ser.readline()
 
-def send_end_message():
-    """ Funcion para enviar un mensaje de finalizacion a la ESP32 """
-    end_message = pack('4s', 'END\0'.encode())
-    ser.write(end_message)
 
-# # Se lee data por la conexion serial
-# counter = 0
-while True:
-    if ser.in_waiting > 0:
-        try:
-            response = ser.readline()
-        except KeyboardInterrupt:
-            print('Finalizando comunicacion')
-            break
-        except:
-            print('Error en leer mensaje')
-            continue
+def receive_bytes(size: int) -> bytes:
+    """Funcion para recibir un mensaje de la ESP32."""
+    return ser.read(size)
+
+
+def wait_message(message: bytes, timeout: int = 5) -> bool:
+    """Funcion para esperar un mensaje especifico de la ESP32 en un tiempo maximo."""
+    start_time = time.time()
+    while True:
+        timer = time.time() - start_time
+        if timer > timeout:
+            return False
+        if ser.in_waiting > 0:
+            try:
+                response = receive_message()
+                if message in response:
+                    return True
+            except: 
+                continue
+
+
+def test_conn() -> bool:
+    """Funcion para testear la conexion a la ESP32."""
+    # Se envia el mensaje de inicio de comunicacion
+    send_message("5s", b"TEST\0")
+    return wait_message(b"OK")
+
+def receive_acc_data() -> tuple[float, float, float]:
+    """Funcion para recibir los datos de la ESP32."""
+    recv_bytes = receive_bytes(12)
+    try:
+        acc_x, acc_y, acc_z = unpack("fff", recv_bytes)
+    except ValueError:
+        return None
+    else:
+        return acc_x, acc_y, acc_z
+
+if __name__ == "__main__":
+    # Se inicia la conexion
+    while True:
+        if test_conn():
+            print("Conexion exitosa")
+            send_message("6s", b"START\0")
+            if not wait_message(b"OK"):
+                continue
+            while True:
+                acc_data = receive_acc_data()
+                if acc_data:
+                    print(f"Acelerometro: {acc_data}")
+        else:
+            print("Conexion fallida")

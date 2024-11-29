@@ -1,17 +1,14 @@
-#pragma once
-
 #include <stdio.h>
 #include <string.h>
 
-#include <stdio.h>
-#include "driver/uart.h"
 #include "driver/i2c_master.h"
 #include "driver/gpio.h"
-#include "sdkconfig.h"
 #include "esp_log.h"
 #include "esp_task.h"
 #include "math.h"
+#include "sdkconfig.h"
 
+#include "driver/uart.h"
 
 #define BUF_SIZE (128) // buffer size
 #define TXD_PIN 1  // UART TX pin
@@ -19,9 +16,7 @@
 #define UART_NUM UART_NUM_0   // UART port number
 #define BAUD_RATE 115200   // Baud rate
 
-#define REDIRECT_LOGS 0 // if redirect ESP log to another UART
-
-
+#define REDIRECT_LOGS 1 // if redirect ESP log to another UART
 #define I2C_MASTER_SCL_IO GPIO_NUM_22  // GPIO pin
 #define I2C_MASTER_SDA_IO GPIO_NUM_21  // GPIO pin
 #define I2C_MASTER_FREQ_HZ 10000
@@ -588,7 +583,8 @@ void initialization(void) {
     ret = bmi_write(&reg_init_ctrl, &val_init_ctrl, 1);
 
     int config_size = sizeof(bmi270_config_file);
-    printf("Tamano config_file: %d\n\n",config_size);
+    // printf("Tamano config_file: %d\n\n",config_size);
+
 
     ret = bmi_write(&reg_init_data, (uint8_t *)bmi270_config_file, config_size);
     if (ret != ESP_OK) {
@@ -636,7 +632,6 @@ void internal_status(void) {
     // printf("Initial status: %x \n",(tmp & 0b00001111));
     printf("Internal Status: %2X\n\n", tmp);
 }
-
 void bmipowermode(void) {
     // PWR_CTRL: disable auxiliary sensor, gryo and temp; acc on
     // 400Hz en datos acc, filter: performance optimized, acc_range +/-8g (1g = 9.80665 m/s2, alcance max: 78.4532 m/s2, 16 bit= 65536 => 1bit = 78.4532/32768 m/s2)
@@ -665,6 +660,7 @@ void bmipowermode(void) {
     vTaskDelay(1000 / portTICK_PERIOD_MS);
 }
 
+#if 1
 // Function for sending things to UART1
 static int uart1_printf(const char *str, va_list ap) {
     char *buf;
@@ -707,6 +703,7 @@ int serial_read(char *buffer, int size){
     return len;
 }
 
+#endif
 void get_acc(float *acc_array) {
     uint8_t reg_intstatus = 0x03, tmp;
     uint8_t addr_acc_x_lsb = 0x0C, addr_acc_x_msb = 0x0D;
@@ -741,7 +738,7 @@ void get_acc(float *acc_array) {
     }
 }
 
-
+#if 1
 void start_reading(void) {
     char read_buffer[4];
     char *uart_send_buffer;
@@ -778,6 +775,7 @@ void start_conn(void) {
         vTaskDelay(pdMS_TO_TICKS(500));
     }
 }
+#endif
 
 void test(void) {
   printf("<TEST>: \n");
@@ -790,8 +788,6 @@ void test(void) {
 }
 
 void app_main(void) {
-    uart_setup();
-
     ESP_ERROR_CHECK(bmi_init());
     softreset();
     chipid();
@@ -799,6 +795,8 @@ void app_main(void) {
     check_initialization();
     bmipowermode();
     internal_status();
+
+    uart_setup();
     printf("Comienza lectura\n\n");
-    test();
+    start_conn();
 }
