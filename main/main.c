@@ -783,7 +783,7 @@ void test(void) {
   while (1) {
     get_acc(acc_array);
     printf("Acc: %f %f %f\n", acc_array[0], acc_array[1], acc_array[2]);
-    vTaskDelay(pdMS_TO_TICKS(500));
+    vTaskDelay(pdMS_TO_TICKS(100));
   }
 }
 
