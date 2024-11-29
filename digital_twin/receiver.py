@@ -11,7 +11,7 @@ def receive_acc_data_fake() -> tuple[float, float, float]:
     #     return None
     # else:
     #     return acc_x, acc_y, acc_z
-    
+
     acc_x = random.uniform(-1, 1)
     acc_y = random.uniform(-1, 1)
     acc_z = random.uniform(-1, 1)
@@ -19,7 +19,7 @@ def receive_acc_data_fake() -> tuple[float, float, float]:
     return acc_x, acc_y, acc_z
 
 def start_receiving_fake():
-    """funcion par iniciar la conexión"""
+    """Función para iniciar la conexión"""
     # while True:
     #     if test_conn():
     #         print("Conexion exitosa")
@@ -45,5 +45,5 @@ if __name__ == "__main__":
     logging.basicConfig(format=LOGGING_FORMAT,
                         style="%",
                         level=logging.DEBUG)
-    # Call the start_receiving function here if running this script standalone
+    
     start_receiving_fake()
