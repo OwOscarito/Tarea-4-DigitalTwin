@@ -1,15 +1,23 @@
+import logging
 import struct
 import time
 
 import serial
-import logging
+
 # Se configura el puerto y el BAUD_Rate
-PORT = "COM3"  # Esto depende del sistema operativo
+PORT = "COM9"  # Esto depende del sistema operativo
 BAUD_RATE = 115200  # Debe coincidir con la configuracion de la ESP32
 
 
 # Se abre la conexion serial
-ser = serial.Serial(PORT, BAUD_RATE, timeout=1)
+ser = None
+
+
+def init_receiver(port=PORT, baud_rate=BAUD_RATE) -> None:
+    """Funcion para inicializar la conexion serial."""
+    global ser
+    ser = serial.Serial(port, baud_rate, timeout=1)
+    logging.info("Serial port opened")
 
 
 # Funciones
@@ -25,6 +33,7 @@ def receive_message() -> bytes:
     logging.debug("[%s]", recv_message)
     return recv_message
 
+
 def receive_bytes(size: int) -> bytes:
     """Funcion para recibir un mensaje de la ESP32."""
     recv_bytes = ser.read(size)
@@ -32,7 +41,7 @@ def receive_bytes(size: int) -> bytes:
     return recv_bytes
 
 
-def wait_message(message: bytes, timeout: int = 5) -> bool:
+def wait_message(message: bytes, timeout: int = 1) -> bool:
     """Funcion para esperar un mensaje especifico de la ESP32 en un tiempo maximo."""
     logging.info("Waiting for %s", message)
     start_time = time.time()
@@ -57,6 +66,13 @@ def test_conn() -> bool:
     send_message("6s", b"TEST\0\0")
     return wait_message(b"OK")
 
+
+def start_message() -> bool:
+    """Funcion para iniciar la lectura de datos."""
+    send_message("6s", b"START\0")
+    return wait_message(b"OK")
+
+
 def receive_acc_data() -> tuple[float, float, float]:
     """Funcion para recibir los datos de la ESP32."""
     recv_bytes = receive_bytes(struct.calcsize("fff"))
@@ -68,22 +84,33 @@ def receive_acc_data() -> tuple[float, float, float]:
     else:
         return [acc_x, acc_y, acc_z]
 
+
+def stop_message() -> bool:
+    """Funcion para detener la recepcion de datos."""
+    send_message("6s", b"STOP\0\0")
+    return wait_message(b"OK")
+
+
 if __name__ == "__main__":
     LOGGING_FORMAT = "%(levelname)s - <%(funcName)s>: %(message)s"
-    logging.basicConfig(format=LOGGING_FORMAT,
-                        style="%",
-                        level=logging.DEBUG)
+    logging.basicConfig(format=LOGGING_FORMAT, style="%", level=logging.DEBUG)
     # Se inicia la conexion
-    while True:
+    init_receiver()
+
+    count = 0
+    while count < 3:
+        print(f"Count {count}")
         if test_conn():
             print("Conexion exitosa")
-            send_message("6s", b"START\0")
-            if not wait_message(b"OK"):
-                continue
-            while True:
-                if ser.in_waiting > 0:
-                    acc_data = receive_acc_data()
-                    if acc_data:
-                        print(f"Acelerometro: {acc_data}")
+            if not start_message():
+                stop_message()
+            received = 0
+            while received < 10:
+                acc_data = receive_acc_data()
+                if acc_data:
+                    print(f"Acelerometro: {acc_data}")
+                    received += 1
         else:
             print("Conexion fallida")
+            stop_message()
+        count += 1
