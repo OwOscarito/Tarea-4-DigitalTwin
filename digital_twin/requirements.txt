@@ -7,6 +7,7 @@ numpy
 packaging
 pillow
 pyparsing
+pyserial
 PyQt5
 PyQt5-Qt5
 PyQt5_sip
