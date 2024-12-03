@@ -740,11 +740,11 @@ void get_acc(float *acc_array) {
 
 #if 1
 void start_reading(void) {
-    char read_buffer[5];
+    char read_buffer[6];
     const char *uart_send_buffer;
     float acc_array[3];
     while (1) {
-        int read_len = serial_read(read_buffer, 4);
+        int read_len = serial_read(read_buffer, 6);
         if (read_len > 0) {
             if (strcmp(read_buffer, "STOP") == 0) {
                 serial_write("OK\n", 3);
@@ -754,7 +754,7 @@ void start_reading(void) {
         get_acc(acc_array);
         uart_send_buffer = (const char *)acc_array;
         serial_write(uart_send_buffer, 3 * sizeof(float));
-        vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(50));
     }
 }
 
