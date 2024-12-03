@@ -119,7 +119,7 @@ if __name__ == "__main__":
     LOGGING_FORMAT = "%(levelname)s - <%(funcName)s>: %(message)s"
     logging.basicConfig(format=LOGGING_FORMAT,
                         style="%",
-                        level=logging.DEBUG)
+                        level=logging.ERROR)
     app = QApplication([])
     window = MainWindow()
     window.show()
