@@ -21,17 +21,22 @@ class Visualizer(QWidget):
         self.fig, self.ax = plt.subplots(subplot_kw={"projection": "3d"})
         self.canvas = FigureCanvas(self.fig)
         self.quiver = self.ax.quiver(*self.get_arrow())
-        self.ax.set(xlim=[-2, 2], ylim=[-2, 2], zlim=[-2, 2])
+        self.ax.set(xlim=[-1.5, 1.5], ylim=[-1.5, 1.5], zlim=[-1.5, 1.5])
+
+        self.ax.set_xlabel("X")
+        self.ax.set_ylabel("Y")
+        self.ax.set_zlabel("Z")
+
         layout = QVBoxLayout()
         layout.addWidget(self.canvas)
         self.setLayout(layout)
         self.show()
 
     def get_arrow(self) -> None:
-        u = np.linspace(0, self.acc_data[0], 100)
-        v = np.linspace(0, self.acc_data[1], 100)
-        w = np.linspace(0, self.acc_data[2], 100)
-        return 0,0,0,u,v,w
+        u = self.acc_data[0]
+        v = self.acc_data[1]
+        w = self.acc_data[2]
+        return 0, 0, 0, -u, v, -w
 
     def update(self, data: tuple[float, float, float]) -> None:
         self.acc_data = data
@@ -95,10 +100,9 @@ class MainWindow(QMainWindow):
         if self.thread:
             self.thread.join()
             self.thread = None
-        if receiver.stop_message():
-            self.connect_button.setText("Conectar")
-        else:
-            logging.error("No se pudo detener la lectura")
+        receiver.stop_message()
+        self.connect_button.setText("Conectar")
+
 
     @pyqtSlot()
     def connection_manager(self) -> None:
@@ -109,10 +113,13 @@ class MainWindow(QMainWindow):
         if self.start_reader():
             return
         self.stop_reader()
+        self.start_reader()
 
 if __name__ == "__main__":
     LOGGING_FORMAT = "%(levelname)s - <%(funcName)s>: %(message)s"
-    logging.basicConfig(format=LOGGING_FORMAT, style="%", level=logging.DEBUG)
+    logging.basicConfig(format=LOGGING_FORMAT,
+                        style="%",
+                        level=logging.DEBUG)
     app = QApplication([])
     window = MainWindow()
     window.show()

@@ -82,6 +82,7 @@ def receive_acc_data() -> tuple[float, float, float]:
         logging.debug("Error unpacking data")
         return None
     else:
+        logging.info("Data: [%s, %s, %s]", acc_x, acc_y, acc_z)
         return [acc_x, acc_y, acc_z]
 
 
@@ -107,9 +108,7 @@ if __name__ == "__main__":
             received = 0
             while received < 10:
                 acc_data = receive_acc_data()
-                if acc_data:
-                    print(f"Acelerometro: {acc_data}")
-                    received += 1
+            break
         else:
             print("Conexion fallida")
             stop_message()
